@@ -1,0 +1,97 @@
+# BEGIN WordPress
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteBase /
+
+# require www and https 
+# comment out the first two if you do not need www
+# comment out all lines for local dev
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [NE,L,R=301]
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [NE,L,R=301]
+
+RewriteRule ^index\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+
+</IfModule>
+
+# END WordPress
+
+
+## PROTECT .HTACCESS, ERROR LOGS, WP-CONFIG.PHP AND PHP.INI FILES ##
+<FilesMatch "^.*(error_log|wp-config\.php|php.ini|\.[hH][tT][aApP].*)$">
+	Order deny,allow
+	Deny from all
+</FilesMatch>
+
+## PREVENT WORDPRESS DIRECTORY BROWSING ##
+    Options All -Indexes
+
+## PROTECT IMPORTANT PHP FILES ##
+	RewriteCond %{REQUEST_URI} !^/wp-content/plugins/mu-plugins/
+	RewriteRule wp-content/plugins/(.*\.php)$ - [R=404,L]
+	RewriteCond %{REQUEST_URI} !^/wp-content/themes/V2/
+	RewriteRule wp-content/themes/(.*\.php)$ - [R=404,L]
+
+	# Block the include-only files.
+	<IfModule mod_rewrite.c>
+	RewriteEngine On
+	RewriteBase /
+	RewriteRule ^wp-admin/includes/ - [F,L]
+	RewriteRule !^wp-includes/ - [S=3]
+	RewriteRule ^wp-includes/[^/]+\.php$ - [F,L]
+	RewriteRule ^wp-includes/js/tinymce/langs/.+\.php - [F,L]
+	RewriteRule ^wp-includes/theme-compat/ - [F,L]
+	</IfModule>
+
+## COMPRESS TEXT, HTML, JAVASCRIPT, CSS, XML ##
+## BEGIN GZIP ##
+	<IfModule mod_deflate.c>
+	    # The following line is enough for .js and .css .html
+	    AddOutputFilter DEFLATE js css html
+	    AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml application/xhtml+xml text/css application/xml application/rss+xml application/atom_xml application/x-javascript application/javascript application/x-httpd-php application/x-httpd-fastphp text/html
+
+	    # The following lines are to avoid bugs with some browsers
+	    BrowserMatch ^Mozilla/4 gzip-only-text/html
+	    BrowserMatch ^Mozilla/4\.0[678] no-gzip
+	    BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
+	</IfModule>
+
+	# BEGIN EXPIRES
+	<IfModule mod_expires.c>
+	    ExpiresActive On
+	    ExpiresDefault "access plus 10 days"
+	    ExpiresByType text/css "access plus 1 week"
+	    ExpiresByType text/plain "access plus 1 month"
+	    ExpiresByType image/gif "access plus 1 month"
+	    ExpiresByType image/png "access plus 1 month"
+	    ExpiresByType image/jpeg "access plus 1 month"
+	    ExpiresByType application/x-javascript "access plus 1 month"
+	    ExpiresByType application/javascript "access plus 1 week"
+	    ExpiresByType application/x-icon "access plus 1 year"
+	</IfModule>
+
+	<IfModule mod_headers.c>
+	    <FilesMatch "\.(js|css|xml|gz)$">
+	        Header append Vary Accept-Encoding
+	    </FilesMatch>
+	    <FilesMatch "\.(ico|jpe?g|png|gif|swf)$">
+	        Header set Cache-Control "public"
+	    </FilesMatch>
+	    <FilesMatch "\.(css)$">
+	        Header set Cache-Control "public"
+	    </FilesMatch>
+	    <FilesMatch "\.(js)$">
+	        Header set Cache-Control "private"
+	    </FilesMatch>
+	    <FilesMatch "\.(x?html?|php)$">
+	        Header set Cache-Control "private, must-revalidate"
+	    </FilesMatch>
+	</IfModule>
+
+
+
+## END OF HTACCESS
