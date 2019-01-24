@@ -1,5 +1,5 @@
 # wordpress_htaccess
-#use this for word press cyber attack
+## use this for word press cyber attack
 
 **directory browsing**
 
